@@ -1,7 +1,7 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import * as Google from 'expo-google-app-auth';
 import {ANDROID_CLIENT_ID} from '@env';
-import { GoogleAuthProvider, signInWithCredential } from '@firebase/auth';
+import { GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signOut } from '@firebase/auth';
 import { auth } from '../firebase';
 
 const AuthContext = createContext({});
@@ -13,8 +13,23 @@ const config = {
 }
 
 export const AuthProvider = ({children}) => {
-
+    const [error, setError] = useState(null);
+    const [user,setUser] = useState(null);
+    const [loadingInitial,setLoadingInitial]= useState(true);
+    const[loading,setLoading]=useState(false);
+    useEffect(()=> onAuthStateChanged(auth,(user)=>{
+            if(user){
+                setUser(user);
+            }
+            else{
+                setUser(null);
+            }
+            setLoadingInitial(false);
+        })
+    ,[])
+    //Sign function
     const signInWithGoogle = async () =>{
+        setLoading(true);
         await Google.logInAsync(config).then(async(loginResult)=>{
             if (loginResult.type ==='success'){
                 //login..
@@ -23,15 +38,24 @@ export const AuthProvider = ({children}) => {
                 await signInWithCredential(auth,credential)
             }
             return Promise.reject();
-        })
+        }).catch(error=>setError(error)).finally(()=>setLoading(false))
     }
+    //Signout function
+    const logout = ()=>{
+        setLoading(true);
+        signOut(auth).catch(error=>setError(error)).finally(()=>setLoading(false))
+    }
+
 
     return (
         <AuthContext.Provider value={{
-            user:null,
-            signInWithGoogle
+            user,
+            loading,
+            error,
+            signInWithGoogle,
+            logout
         }}>
-            {children}
+            {!loadingInitial && children}
         </AuthContext.Provider>
     )
 }
