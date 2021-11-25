@@ -8,11 +8,11 @@ const LoginScreen = () => {
     const {loading,signInWithGoogle} = useAuth();
     const navigation = useNavigation();
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerShown:false
-        })
-    }, [])
+    // useLayoutEffect(() => {
+    //     navigation.setOptions({
+    //         headerShown:false
+    //     })
+    // }, [])
     return (
         <View style={tw('flex-1')}>
             <ImageBackground
