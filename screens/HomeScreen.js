@@ -1,10 +1,10 @@
 import { useNavigation } from '@react-navigation/core'
-import React from 'react'
-import { View, Text, Button, TouchableOpacity, Image } from 'react-native'
+import React, { useRef } from 'react'
+import { View, Text, Button, TouchableOpacity, Image, StyleSheet } from 'react-native'
 import useAuth from '../hooks/useAuth';
 import tw from'tailwind-rn';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {Ionicons} from'@expo/vector-icons'
+import {Ionicons, Entypo} from'@expo/vector-icons'
 import Swiper from 'react-native-deck-swiper';
 
 const burned_data=[
@@ -33,7 +33,8 @@ const burned_data=[
 
 const HomeScreen = () => {
     const navigation = useNavigation();
-    const {user, logout}=useAuth()
+    const {user, logout}=useAuth();
+    const swipeRef= useRef(null);
     return (
         <SafeAreaView style={tw('flex-1')}>
             <View style={tw('flex-row items-center justify-between px-4')}>
@@ -58,15 +59,42 @@ const HomeScreen = () => {
             <View style={tw('flex-1')}>
                 <Swiper 
                 containerStyle={tw('bg-transparent')} cards={burned_data} 
+                ref={swipeRef}
                 stackSize={5}
                 cardIndex={0}
                 animateCardOpacity
                 verticalSwipe={false}
+                overlayLabels={{
+                    left:{
+                        title:"NOPE",
+                        style:{
+                            label:{
+                                textAlign:'right',
+                                color:'red'
+                            }
+                        }
+                    },
+                    right:{
+                        title:"MATCH",
+                        style:{
+                            label:{
+                                textAlign:'left',
+                                color:'green'
+                            }
+                        }
+                    }
+                }}
+                onSwipedLeft={()=>{
+                    console.log('left')
+                }}
+                onSwipedRight={()=>{
+
+                }}
                 renderCard={
                     (card)=>(
                         <View style={tw('bg-white h-3/4 rounded-xl')}>
                             <Image style={tw('flex-1 rounded-t-xl')} source={{uri:card.photoURL}}/> 
-                            <View style={tw('flex-row justify-between p-4')}>
+                            <View style={[tw('flex-row justify-between p-4 rounded-b-xl'),styles.cardShadow]}>
                                 <View>
                                     <Text style={tw('text-xl font-bold')}>{card.firstName} {card.lastName}</Text>
                                     <Text>{card.occupation}</Text>
@@ -79,6 +107,18 @@ const HomeScreen = () => {
                 }
                 />
             </View>
+            <View style={tw('flex flex-row justify-evenly pb-4')}>
+                <TouchableOpacity
+                style={tw('bg-red-200 rounded-full w-16 h-16 items-center justify-center')}
+                onPress={()=>swipeRef.current.swipeLeft()}>
+                    <Entypo name= "cross" size={24} color='red'/>
+                </TouchableOpacity>
+                <TouchableOpacity
+                style={tw('bg-green-200 rounded-full w-16 h-16 items-center justify-center')}
+                onPress={()=>swipeRef.current.swipeRight()}>
+                    <Entypo name= "heart" size={24} color= 'green'/>
+                </TouchableOpacity>
+            </View>
             {/* <Button title="Go to the chat screen" onPress={()=>navigation.navigate('ChatScreen')}/>
             <Button title="Logout" onPress={()=>logout()}/> */}
         </SafeAreaView>
@@ -86,3 +126,16 @@ const HomeScreen = () => {
 }
 
 export default HomeScreen
+
+const styles = StyleSheet.create({
+    cardShadow: {
+        shadowColor:'#000',
+        shadowOffset:{
+            width:0,
+            height:1
+        },
+        shadowOpacity:0.2,
+        shadowRadius:1.41,
+        elevation:2
+    }
+})
