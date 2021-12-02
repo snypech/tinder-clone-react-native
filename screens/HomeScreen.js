@@ -46,7 +46,7 @@ const HomeScreen = () => {
                     style={tw('h-10 w-10 rounded-full')}
                     />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={()=>navigation.navigate('Modal')}>
                 <Image 
                     source={require("../icon2.png")}
                     style={tw('h-14 w-14')}
